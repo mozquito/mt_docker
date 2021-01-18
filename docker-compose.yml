@@ -1,0 +1,42 @@
+version: '3.7'
+
+services:
+    mt:
+        build: ./docker/movabletype
+        volumes:
+            - ./volumes/web1:/var/www/web1:delegated
+            - ./volumes/plugins:/var/www/mt/plugins:delegated
+        environment:
+            - StaticWebPath=http://localhost/mt/mt_satic
+            - CGIPath=http://localhost/mt/
+            - DATABASE_NAME=mt
+            - DATABASE_USERNAME=mt_user
+            - DATABASE_PASSWORD=abc123
+            - DB_HOST=mysql:3306
+            - worker=3
+        depends_on:
+            - "mysql"
+        ports:
+            - "127.0.0.1:5000:5000"
+    mysql:
+        image: mysql:8
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: mt
+            MYSQL_USER: mt_user
+            MYSQL_PASSWORD: abc123
+            TZ: 'Asia/Tokyo'
+        command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password
+        ports:
+            - 3306:3306
+    httpd:
+        build: ./docker/httpd
+        depends_on:
+            - "mysql"
+            - "mt"
+        ports:
+            - 80:80
+        volumes:
+            - ./volumes/web1:/var/www/web1:delegated
+        environment:
+            host: http://mt

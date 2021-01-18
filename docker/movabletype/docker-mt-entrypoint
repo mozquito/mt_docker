@@ -1,0 +1,13 @@
+#!/bin/bash
+if [ $CGIPath ];then
+sed -i -e "s|CGIPath    http://www.example.com/mt/|CGIPath $CGIPath|g" mt-config.cgi
+fi;
+if [ $StaticWebPath ];then
+sed -i -e "s|StaticWebPath    http://www.example.com/mt/mt-static|StaticWebPath $StaticWebPath|g" mt-config.cgi
+fi;
+
+sed -i -e "s/Database DATABASE_NAME/Database $DATABASE_NAME/g" mt-config.cgi
+sed -i -e "s/DBUser DATABASE_USERNAME/DBUser $DATABASE_USERNAME/g" mt-config.cgi
+sed -i -e "s/DBPassword DATABASE_PASSWORD/DBPassword $DATABASE_PASSWORD/g" mt-config.cgi
+sed -i -e "s/DBHost localhost/DBHost $DB_HOST/g" mt-config.cgi
+starman --pid /var/run/mt.pid --port 5000 mt.psgi --worker ${worker:-1} $plackargs
